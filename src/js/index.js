@@ -74,6 +74,8 @@ const appendHeader = (() => {
             formValues.forEach((val, i) => i !== 1 && !val ? validInputs = false : null);
             if (!validInputs) return;
             
+            // adding task to sidebar and projects
+
             const task = new Task(...formValues);
             sidebar.addTaskToProject(task.title, currentProject);
             
@@ -83,6 +85,22 @@ const appendHeader = (() => {
             document.body.querySelector('main')?.remove();
             document.body.append(main.createMain(cur.getTasks()));
 
+            // adding event listener to sidebar
+            const currentProjectElement = document.querySelector(`[data-title="${currentProject}"]`);
+            const taskElement = currentProjectElement.querySelector(`[data-title="${task.title}"]`);
+            const trashIconElement = taskElement.querySelector('svg');
+            trashIconElement.addEventListener('click', e => {
+                const taskTitle = e.target.parentNode.dataset.title;
+                const projectTitle = e.target.parentNode.parentNode.dataset.title;
+                console.log(projectTitle)
+
+                const curProj = projects.find(p => p.getName() === projectTitle);
+                
+                const curTask = curProj.getTasks().find(t => t.title === taskTitle);
+
+                curProj.deleteTask(curTask);
+                sidebar.removeTaskOfProject(taskTitle, projectTitle);
+            })
             dialog.remove();
         });
 
@@ -136,7 +154,7 @@ sidebarProjects.addEventListener('click', e => {
     const targetName = projectEl.dataset.title;
     const selectedProject = projects.find((p) => p.getName() === targetName);
     selectProject(selectedProject);
-})
+});
 
 
 

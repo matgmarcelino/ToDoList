@@ -93,6 +93,7 @@ const addTaskToProject = (taskTitle, projectTitle) => {
 
     const task = document.createElement('li');
     task.classList.add('project-item');
+    task.dataset.title = taskTitle;
     
     const taskSpan = document.createElement('span');
     taskSpan.classList.add('project-item-title');
@@ -123,4 +124,12 @@ const addTaskToProject = (taskTitle, projectTitle) => {
     projectItems.append(task);
 }
 
-export { createSidebar, createProject, addTaskToProject };
+const removeTaskOfProject = (taskTitle, projectTitle) => {
+    const project = document.querySelector(`.project[data-title="${projectTitle}"]`);
+    if (!project) return;
+
+    const task = project.querySelector(`li[data-title="${taskTitle}"]`);
+    console.log(task);
+}
+
+export { createSidebar, createProject, addTaskToProject, removeTaskOfProject };
