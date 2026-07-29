@@ -1,5 +1,7 @@
-export function Project(name) {
-    this.name = name;
+function Project(title) {
+    this.title = title;
+    this.id = crypto.randomUUID();
+
     const tasks = [];
 
     const addTask = (task) => {
@@ -8,15 +10,24 @@ export function Project(name) {
         tasks.sort((a, b) => a.dueDate - b.dueDate);
     }
 
-    const deleteTask = (task) => {
-        const index = tasks.findIndex((t) => t === task);
-        if (index >= 0) tasks.splice(index, 1);
+    const removeTask = (task) => {
+        const index = tasks.findIndex((t) => t.id === task.id);
+        if (index === -1) throw new Error('Task not found!'); 
+        
+        tasks.splice(index, 1);
     }
+
+    const setName = (title) => this.title = title;
 
     const getTasks = () => [...tasks];
 
-    const getName = () => this.name;
-    const setName = (name) => this.name = name;
+    const getTitle = () => this.title;
 
-    return { addTask, deleteTask, getTasks, getName, setName };
+    const getID = () => this.id;
+
+    const setID = (id) => this.id = id;
+
+    return { addTask, removeTask, getTasks, getName, setName, getID, setID };
 }
+
+export { Project };

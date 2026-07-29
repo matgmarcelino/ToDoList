@@ -5,6 +5,7 @@ function Task(title, description, dueDate, priority, projectAssigned) {
     this.priority = priority;
     this.projectAssigned = projectAssigned;
     this.isComplete = false;
+    this.id = crypto.randomUUID();
 }
 
 export {Task};
