@@ -1,4 +1,10 @@
 import "../style.css";
-import * as projectsManager from './api/projectsManager.js';
+import * as ProjectsManager from './api/projectsManager.js';
+import * as sidebar from './components/sidebar.js';
 
-projectsManager.createDefaultProject();
+export const sharedState = {
+    project: null
+}
+ProjectsManager.createDefaultProject();
+
+

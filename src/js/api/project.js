@@ -17,7 +17,7 @@ function Project(title) {
         tasks.splice(index, 1);
     }
 
-    const setName = (title) => this.title = title;
+    const setTitle = (title) => this.title = title;
 
     const getTasks = () => [...tasks];
 
@@ -27,7 +27,7 @@ function Project(title) {
 
     const setID = (id) => this.id = id;
 
-    return { addTask, removeTask, getTasks, getName, setName, getID, setID };
+    return { addTask, removeTask, getTasks, getTitle, setTitle, getID, setID };
 }
 
 export { Project };

@@ -88,7 +88,7 @@
     display: grid;
     height: 100vh;
     grid-template-columns: minmax(200px, 1fr) 5fr;
-    grid-template-rows: minmax(200px, 1fr) 5fr;
+    grid-template-rows: 150px 1fr;
     grid-template-areas: 
         "aside header"
         "aside main";
@@ -106,6 +106,124 @@
     grid-area: main;
   }
 
+    /* ======= SCROLLBAR ======= */
+
+  /* Firefox (inherits to every scrollable element) */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  /* Chromium / WebKit / Edge */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;   /* horizontal bars too */
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 160ms ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--border-strong);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  html {
+    color-scheme: dark;
+    background-color: var(--bg-app);
+  }
+
+  /* ======= CUSTOM CHECKBOX ======= */
+
+  .checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* hide the native input but keep it focusable and accessible */
+  .checkbox input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .checkbox-box {
+    display: grid;
+    place-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    border: 2px solid var(--border-strong);
+    border-radius: 0.375rem;
+    background-color: var(--surface-2);
+    transition:
+      background-color var(--transition),
+      border-color var(--transition),
+      box-shadow var(--transition);
+  }
+
+  /* the checkmark */
+  .checkbox-box::before {
+    content: "";
+    width: 0.7rem;
+    height: 0.7rem;
+    background-color: var(--text-on-accent);
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0) rotate(-15deg);
+    transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .checkbox:hover .checkbox-box {
+    border-color: var(--accent-line);
+  }
+
+  .checkbox input:checked + .checkbox-box {
+    background-color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checkbox input:checked + .checkbox-box::before {
+    transform: scale(1) rotate(0);
+  }
+
+  .checkbox input:focus-visible + .checkbox-box {
+    box-shadow: var(--ring-focus);
+  }
+
+  .checkbox-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    transition: color var(--transition);
+  }
+
+  .checkbox:has(input:checked) .checkbox-label {
+    color: var(--success);
+  }
+
   /* ======= SIDEBAR ======= */
 
   aside {
@@ -120,9 +238,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
+    font-size: 2.5rem;
     margin: 0 1rem;
     border-bottom: 2px solid var(--border-subtle);
+    user-select: none;
   }
 
   .sidebar-brand {
@@ -141,19 +260,15 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-  }
-
-  .sidebar-projects h2 {
-    color: var(--text-accent);
-    font-size: 1.5rem;
-    font-weight: 500;
-    cursor: default;
-    user-select: none;
+    overflow: auto;
   }
 
   /* SIDEBAR PROJECT */
 
   .project {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .project-header {
@@ -163,8 +278,414 @@
     color: var(--text-primary);
     cursor: pointer;
     transition: var(--transition);
+    font-size: 1.5rem;
   }
 
-  .project-header.open {
-    
+  .project-header:hover {
+    color: var(--text-accent);
   }
+
+  .project-header .chevron {
+    font-size: 0.8rem;
+    transition: var(--transition);
+  }
+
+  .project.open .chevron{
+    transform: rotateZ(90deg)
+  }
+
+  /* DROPDOWN LOGIC */
+
+  .tasks {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: 
+      grid-template-rows 220ms ease,
+      opacity 180ms ease;
+  }
+
+  .tasks-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .project.open .tasks {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .project.open .task {
+    animation: task-in 200ms ease backwards;
+  }
+  .project.open .task:nth-child(2) { animation-delay: 40ms; }
+  .project.open .task:nth-child(3) { animation-delay: 80ms; }
+  .project.open .task:nth-child(4) { animation-delay: 120ms; }
+  
+  @keyframes task-in {
+    from { opacity: 0; transform: translateY(-6px); }
+  }
+
+
+  /* TASK */
+
+  .task {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color var(--transition);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+  }
+
+  .task:hover {
+    background-color: var(--surface-2);
+  }
+
+  .task svg {
+    transition: var(--transition);
+  }
+
+  .task svg:hover {
+    transform: scale(1.05);
+  }
+
+  /* NEW PROJECT BUTTON */
+
+  .sidebar-new-project-btn {
+    width: 70%;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    background-color: var(--accent);
+    transition: background-color var(--transition);
+  }
+
+  .sidebar-new-project-btn:hover {
+    background-color: var(--accent-hover);
+  }
+
+  .sidebar-new-project-btn-text {
+    color: var(--text-on-accent);
+  }
+
+  /* ======== HEADER ======== */
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4rem;
+    background-color: var(--bg-header);
+    border-bottom: 2px solid var(--border-subtle);
+  }
+
+  .header-project-title {
+    color: var(--accent);
+    font-size: 2.5rem;
+    cursor: pointer;
+  }
+
+  .header-btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .header-btn-group button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    background-color: var(--accent);
+    color: var(--text-on-accent);
+    cursor: pointer;
+    transition: background-color var(--transition);
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .header-btn-group button:hover {
+    background-color: var(--accent-hover);
+  }
+
+  /* ========= MAIN ========= */
+
+  main.empty {
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+  }
+
+  main.empty p {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 400;
+    user-select: none;
+  }
+
+  main {
+    display: grid;
+    padding: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 0.25fr));
+    grid-template-rows: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    overflow: auto;
+  }
+
+  /* TASK CARD */
+
+  .card {
+    display: grid;
+    grid-template-rows: 2fr 3fr 1fr;
+    background-color: var(--surface-1);
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  /* CARD HEADER */
+
+  .card-header {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-strong);
+    cursor: pointer;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    transition: background-color var(--transition), transform var(--transition);
+  }
+
+  .card-header:hover {
+    background-color: var(--surface-2);
+  }
+
+  .card-header:active {
+    transform: scale(1.01);
+  }
+
+  .card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .card-title {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+  }
+
+  .card-date {
+    margin-left: 0.5rem;
+    color: var(--accent);
+  }
+
+  .card-priority {
+    margin: auto;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+  }
+
+  .card-priority.high {
+    background-color: var(--priority-high);
+  }
+
+  .card-priority.medium {
+    background-color: var(--priority-medium);
+    color: var(--text-on-accent);
+  }
+
+  .card-priority.low {
+    background-color: var(--priority-low);
+  }
+
+  /* CARD BODY */
+
+  .card-body {
+    font-size: 0.9rem;
+    overflow: auto; 
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-strong);
+  }  
+
+  /* CARD FOOTER */
+
+  .card-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card:has(input:checked) {
+    border-left: 3px solid var(--success);
+    opacity: 0.75;
+  }
+  
+  .card:has(input:checked) .card-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+
+  .checkbox-label::after { content: "In Progress"; }
+  .checkbox:has(input:checked) .checkbox-label::after { content: "Done"; }
+
+  /* ====== DIALOG ======= */
+
+  dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5); /* Dim the background */
+    backdrop-filter: blur(4px);           /* Blur the content behind it */
+  }
+
+  dialog[open] {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: 1rem;
+    padding: 2rem;
+    gap: 2rem;
+    background-color: var(--surface-3);
+  }
+
+  dialog h3 {
+    color: var(--text-primary);
+    font-size: 2rem;
+    font-weight: 500;
+  }
+
+  /* FORM */
+
+  dialog form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* FIELD */
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .field label {
+    color: var(--text-secondary);
+  }
+
+  .field p {
+    display: none;
+  }
+
+  .field p.invalid {
+    display: inline-block;
+    color: var(--danger);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* BTN GROUP */
+
+  dialog .btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  dialog .btn-group button {
+    padding: 0.5rem 1rem;
+    background-color: var(--accent);
+    color: var(--text-on-accent);
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color var(--transition);
+  }
+
+  dialog .btn-group button:hover {
+    background-color: var(--accent-hover);
+  }
+  
+  /* FIELD CONTROLS */
+
+.field input,
+.field select,
+.field textarea {
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--accent);
+  background-color: var(--surface-1);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  box-shadow: 1px 1px 8px var(--accent-glow);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent-active);
+  box-shadow: var(--ring-focus);
+  outline: none;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+/* SELECT */
+
+.field select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 2.2rem;   /* room for the chevron */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aab3c0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 1rem;
+}
+
+.field select:hover {
+  background-color: var(--surface-2);
+}
+
+.field select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f2a93b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+
+/* the popup list itself */
+.field select option {
+  background-color: var(--surface-1);
+  color: var(--text-primary);
+}
+
+.field select option:disabled {
+  color: var(--text-disabled);
+}
+
+/* grey out the "Select priority..." placeholder while nothing is chosen */
+.field select:invalid {
+  color: var(--text-muted);
+}
+

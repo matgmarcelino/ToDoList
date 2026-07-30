@@ -1,5 +1,7 @@
 import { Task } from './task.js';
 import { Project } from './project.js';
+import { sharedState } from '../index.js';
+import * as sidebar from '../components/sidebar.js';
 
 const projects = [];
 
@@ -29,6 +31,12 @@ const createProject = (title) => {
     projects.push(project);
 }
 
+// edits a project's title given the project id
+const editProjectTitle = (projectID, projectTitle) => {
+    const project = findProjectFromID(projectID);
+    project.setTitle(projectTitle);
+}
+
 // Removes project from projects array
 const removeProject = (projectID) => {
     const index = projects.findIndex((p) => p.getID() === projectID);
@@ -49,6 +57,17 @@ const createTask = (title, description, dueDate, priority, projectID) => {
     project.addTask(task);
 }
 
+// edits a task given the project id and updated task values as an array
+const editTaskFromProject = (taskID, projectID, updatedTaskValues) => {
+    const task = findTaskFromID(taskID, projectID);
+    const [title, dueDate, priority, description] = [...updatedTaskValues];
+    
+    task.title = title;
+    task.dueDate = dueDate;
+    task.priority = priority;
+    task.description = description;
+}
+
 // Removes task from the specified project
 const removeTaskFromProject = (taskID, projectID) => {
     const project = findProjectFromID(projectID);
@@ -65,6 +84,8 @@ const createDefaultProject = () => {
     const project = new Project('My Tasks');
     project.id = 0;
     projects.push(project);
+    sharedState.project = project;
+    sidebar.createProjectElement(project.getTitle(), project.getID());
 }
 
 // completes task given the taskID and projectID
@@ -79,6 +100,6 @@ const uncompleteTask = (taskID, projectID) => {
     task.isComplete = false;
 }
 
-export { createProject, removeProject, createTask, removeTaskFromProject, getProjects, createDefaultProject, completeTask, uncompleteTask };
+export { createProject, removeProject, createTask, removeTaskFromProject, getProjects, createDefaultProject, completeTask, uncompleteTask, editProjectTitle, editTaskFromProject };
 
 
