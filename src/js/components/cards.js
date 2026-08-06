@@ -14,8 +14,9 @@ const renderCards = (el, tasks) => {
 function createCard(task) {
   const card = document.createElement("div");
   card.classList.add("card");
+  card.dataset.id = task.id;
 
-  const cardHeader = () => {
+  const cardHeader = (() => {
     const cardHeaderDiv = document.createElement("div");
     cardHeaderDiv.classList.add("card-header");
 
@@ -29,10 +30,16 @@ function createCard(task) {
 
       const cardDate = document.createElement("div");
       cardDate.classList.add("card-date");
-      cardDate.textContent = task.date;
+      cardDate.textContent = formatDate(task.dueDate);
 
       cardInfoDiv.append(cardTitle, cardDate);
       return cardInfoDiv;
+
+      function formatDate(iso) {
+        if (!iso) return "No due date";
+        const [y, m, d] = iso.split("-").map(Number);
+        return new Date(y, m - 1, d).toLocaleDateString();
+      }
     })();
 
     const cardPriority = document.createElement("div");
@@ -42,7 +49,7 @@ function createCard(task) {
 
     cardHeaderDiv.append(cardInfo, cardPriority);
     return cardHeaderDiv;
-  };
+  })();
 
   const cardBody = document.createElement("div");
   cardBody.classList.add("card-body");
@@ -57,6 +64,7 @@ function createCard(task) {
 
     const input = document.createElement("input");
     input.type = "checkbox";
+    if (task.done) input.checked = true;
 
     const checkboxBox = document.createElement("span");
     checkboxBox.classList.add("checkbox-box");

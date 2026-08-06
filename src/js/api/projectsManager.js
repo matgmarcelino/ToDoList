@@ -10,14 +10,13 @@ let activeProjectID;
 function init() {
   const stored = JSON.parse(localStorage.getItem("projects"));
 
-  if (stored) {
+  if (stored && stored.length > 0) {
     projects.push(...stored);
-    setActiveProject(projects[0].id);
   } else {
-    addProject("My Tasks");
-    setActiveProject(project.id);
+    addProject("My Tasks", true);
   }
 
+  setActiveProject(projects[0].id);
   save(projects);
 }
 
@@ -33,13 +32,24 @@ function getProjects() {
   return [...projects];
 }
 
+function getTask(projectID, taskID) {
+  const project = findProject(projectID);
+  if (!project) throw new Error("No such project found.");
+
+  const task = project.tasks.find((t) => t.id === taskID);
+  if (!task) throw new Error("No task found in the project.");
+
+  return task;
+}
+
 // --- Project Mutations ---
 
-function addProject(title) {
-  const project = createProject(title);
+function addProject(title, isDefault) {
+  const project = createProject(title, isDefault);
   projects.push(project);
 
   save(projects);
+  return project;
 }
 
 function deleteProject(id) {
@@ -47,12 +57,24 @@ function deleteProject(id) {
   if (idx < 0) throw new Error("No such project found.");
   projects.splice(idx, 1);
 
+  // never leave the app with zero projects to render
+  if (projects.length === 0) {
+    const fallback = createProject("My Tasks", true);
+    projects.push(fallback);
+  }
+
+  // if the active project was the one removed, fall back to the first
+  if (id === activeProjectID) {
+    setActiveProject(projects[0].id);
+  }
+
   save(projects);
 }
 
 function renameProject(id, title) {
   const project = findProject(id);
   if (!project) throw new Error("No such project found.");
+  if (project.isDefault) throw new Error("The default project cannot be renamed.");
   project.title = title;
 
   save(projects);
@@ -70,51 +92,44 @@ function toggleProjectOpen(id) {
 // --- Task Mutations ---
 
 function addTask(projectID, data) {
-  // finding and validating project
   const project = findProject(projectID);
   if (!project) throw new Error("No such project found.");
 
-  // creating and adding task
   const task = createTask(data);
-  projects.push(task);
+  project.tasks.push(task);
 
-  save(projectss);
+  save(projects);
+  return task;
 }
 
 function deleteTask(projectID, taskID) {
-  // finding and validating project
   const project = findProject(projectID);
   if (!project) throw new Error("No such project found.");
 
-  // finding and deleting task
-  const taskIdx = project.findIndex((t) => t.id === taskID);
+  const taskIdx = project.tasks.findIndex((t) => t.id === taskID);
   if (taskIdx < 0) throw new Error("No task found in the project.");
-  project.splice(taskIdx, 1);
+  project.tasks.splice(taskIdx, 1);
 
   save(projects);
 }
 
-function editTask(projectID, taskID, data) {
-  // finding and validating project
-  const project = findProject(projectID);
-  if (!project) throw new Error("No such project found.");
+function updateTask(projectID, taskID, data) {
+  const task = getTask(projectID, taskID);
 
-  // finding and editing task
-  const taskIdx = project.findIndex((t) => t.id === taskID);
-  if (taskIdx < 0) throw new Error("No task found in the project.");
-  project[taskIdx] = createTask(data);
+  // merge instead of replace so id and done survive the edit
+  Object.assign(task, {
+    title: data.title,
+    dueDate: data.dueDate,
+    priority: data.priority ?? "none",
+    description: data.description ?? "",
+  });
 
   save(projects);
+  return task;
 }
 
 function toggleTask(projectID, taskID) {
-  // finding and validating project
-  const project = findProject(projectID);
-  if (!project) throw new Error("No such project found.");
-
-  // finding and toggling task
-  const task = project.find((t) => t.id === taskID);
-  if (!task) throw new Error("No task found in the project.");
+  const task = getTask(projectID, taskID);
   task.done = !task.done;
 
   save(projects);
@@ -131,12 +146,13 @@ export {
   setActiveProject,
   getActiveProject,
   getProjects,
+  getTask,
   addProject,
   deleteProject,
   renameProject,
   toggleProjectOpen,
   addTask,
   deleteTask,
-  editTask,
+  updateTask,
   toggleTask,
 };

@@ -279,6 +279,7 @@ aside {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  justify-content: center;
   color: var(--text-primary);
   cursor: pointer;
   transition: var(--transition);
@@ -430,6 +431,10 @@ header {
 
 .header-btn-group button:hover {
   background-color: var(--accent-hover);
+}
+
+.header-btn-group button:disabled {
+  background-color: var(--text-disabled);
 }
 
 /* ========= MAIN ========= */

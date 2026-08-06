@@ -36,9 +36,8 @@ const createTask = (data) => {
 
   const title = data.title;
   const dueDate =
-    data.dueDate ??
-    JSON.stringify(new Date(new Date().setHours(23, 59, 59, 999)));
-  const priority = data.priority;
+    data.dueDate ?? new Date(new Date().setHours(23, 59, 59, 999));
+  const priority = data.priority ?? "none";
   const description = data.description;
   const done = false;
   const id = crypto.randomUUID();

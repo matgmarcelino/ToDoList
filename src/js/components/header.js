@@ -20,6 +20,7 @@ function createHeaderComponents(project) {
     const deleteProjectBtn = document.createElement("button");
     deleteProjectBtn.classList.add("header-delete-project-btn");
     deleteProjectBtn.textContent = "Delete Project";
+    if (project.isDefault) deleteProjectBtn.disabled = true;
 
     btnGroupDiv.append(addTaskBtn, deleteProjectBtn);
     return btnGroupDiv;
