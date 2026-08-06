@@ -1,8 +1,8 @@
 /**
  * @typedef {Object} TaskInput
  * @property {string} title - The task's title. Required; a missing or empty value throws.
- * @property {Date} [dueDate] - When the task is due. Defaults to the end of the current day (23:59:59.999).
- * @property {'low'|'medium'|'high'|null} [priority] - The task's priority. Omit it or pass `null` for no priority.
+ * @property {string} [dueDate] - When the task is due. Defaults to the end of the current day (23:59:59.999).
+ * @property {'low'|'medium'|'high'|none} [priority] - The task's priority.
  * @property {string} [description] - Longer details about the task. Defaults to an empty string.
  */
 
@@ -10,8 +10,8 @@
  * @typedef {Object} Task
  * @property {string} id - A randomly generated UUID.
  * @property {string} title
- * @property {Date} dueDate
- * @property {'low'|'medium'|'high'|null} priority - `null` when the task has no priority set.
+ * @property {string} dueDate
+ * @property {'low'|'medium'|'high'|none} priority
  * @property {string} description
  * @property {boolean} done - Always `false` for a newly created task.
  */
@@ -32,23 +32,25 @@
  * createTask({ title: 'Water plants' }).priority; // → null
  */
 const createTask = (data) => {
-    if (!data.title) throw new Error('Task must have a title.');
+  if (!data.title) throw new Error("Task must have a title.");
 
-    const title = data.title;
-    const dueDate = data.dueDate ?? new Date(new Date().setHours(23, 59, 59, 999));
-    const priority = data.priority ?? null;
-    const description = data.description ?? '';
-    const done = false;
-    const id = crypto.randomUUID();
+  const title = data.title;
+  const dueDate =
+    data.dueDate ??
+    JSON.stringify(new Date(new Date().setHours(23, 59, 59, 999)));
+  const priority = data.priority;
+  const description = data.description;
+  const done = false;
+  const id = crypto.randomUUID();
 
-    return {
-        id: id,
-        title: title,
-        dueDate: dueDate,
-        priority: priority,
-        description: description,
-        done: done,
-    }
-}
+  return {
+    id: id,
+    title: title,
+    dueDate: dueDate,
+    priority: priority,
+    description: description,
+    done: done,
+  };
+};
 
-export { createTask }
+export { createTask };
